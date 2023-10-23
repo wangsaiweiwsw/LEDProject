@@ -29,3 +29,4 @@ with ui.card():
     display_image_and_button()
 
 ui.run()
+撒发生
