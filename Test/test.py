@@ -1,42 +1,32 @@
 from nicegui import ui
-import cv2
 import tempfile
+from FileUpload.local_file_picker import local_file_picker
 
-import ExamineNumber.examinenumber
-
-tempfile_path = None  # 创建一个变量来存储临时文件的路径
+tempfile_path = None  # 创建一个变量来存储上传的文件路径
 
 def handle_upload(event):
     global tempfile_path
     with tempfile.NamedTemporaryFile(delete=False) as temp_file:
-        temp_file.write(event.content.read())
-        tempfile_path = temp_file.name
-
-    confirm_recognition()
+        temp_file.write(event.content.read())  # 保存上传文件的内容到临时文件
+        tempfile_path = temp_file.name  # 获取临时文件的路径
+    ui.notify(f'Uploaded {event.name}')
+    display_image_and_button()  # 显示图片和确认按钮
 
 def confirm_recognition():
     if tempfile_path:
-        image = cv2.imread(tempfile_path)
-        result = ExamineNumber.examinenumber.number(image)
-        ui.page('/result').run()
-        ui.label(result)
+        # 在这里执行确认识别的操作，可以使用tempfile_path来获取图片路径
+        ui.notify(f'Confirmed recognition for {tempfile_path}')
 
-def page_layout():
-    with ui.header(elevated=True).style('background-color: #3874c8').classes('items-center justify-between'):
-        ui.label('头部')
+def display_image_and_button():
+    with ui.card():
+        ui.image(tempfile_path).style('margin-right: 10px;')
+        ui.button('确认识别', on_click=confirm_recognition)  # 点击按钮时调用confirm_recognition方法
 
-    with ui.row():
-        with ui.card():
-            ui.label("选择需要识别的照片")
-            with ui.column().style('flex: 1;'):
-                ui.upload(on_upload=handle_upload).classes('max-w-full')
+with ui.card():
+    ui.upload(on_upload=handle_upload).classes('max-w-full')
 
-    with ui.right_drawer(fixed=False).style('background-color: #ebf1fa').props('bordered') as right_drawer:
-        ui.label('设置')
+with ui.card():
+    display_image_and_button()
 
-    with ui.footer().style('background-color: #3874c8'):
-        ui.label('脚部')
-
-ui.page('/result', page_layout)  # 创建名为 '/result' 的页面
-page_layout()
 ui.run()
+撒发生
